@@ -4,7 +4,7 @@
   "description": "Acts as a fake FTPd server to translate FTP uploads from IP Cameras into motion events for MQTT",
   "main": "server.js",
   "bin": {
-    "mqtt-camera-ftpd": "server.js"
+    "mqtt-camera-ftpd": "./bin/mqtt-camera-ftpd"
   },
   "scripts": {
     "pretest": "npm run hint && npm run style",
