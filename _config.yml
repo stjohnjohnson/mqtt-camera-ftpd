@@ -1,0 +1,9 @@
+---
+mqtt:
+    # Specify your MQTT Broker's hostname or IP address here
+    host: mqtt
+    # Preface for the topics $PREFACE/$USER_NAME/motion
+    preface: camera
+
+# Port number to listen on
+port: 21

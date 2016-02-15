@@ -1,0 +1,41 @@
+{
+  "name": "mqtt-camera-ftpd",
+  "version": "0.0.1",
+  "description": "Acts as a fake FTPd server to translate FTP uploads from IP Cameras into motion events for MQTT",
+  "main": "server.js",
+  "bin": {
+    "mqtt-camera-ftpd": "server.js"
+  },
+  "scripts": {
+    "pretest": "npm run hint && npm run style",
+    "hint": "jshint --show-non-errors *.js",
+    "style": "jscs .",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stjohnjohnson/mqtt-camera-ftpd.git"
+  },
+  "keywords": [
+    "mqtt",
+    "camera",
+    "ftp"
+  ],
+  "author": "St. John Johnson <st.john.johnson@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stjohnjohnson/mqtt-camera-ftpd/issues"
+  },
+  "homepage": "https://github.com/stjohnjohnson/mqtt-camera-ftpd",
+  "dependencies": {
+    "async": "^1.5.2",
+    "ftpd": "^0.2.12",
+    "js-yaml": "^3.4.3",
+    "mqtt": "^1.7.0",
+    "winston": "^2.0.0"
+  },
+  "devDependencies": {
+    "jscs": "^2.9.0",
+    "jshint": "^2.9.1"
+  }
+}
