@@ -1,6 +1,6 @@
 {
   "name": "mqtt-camera-ftpd",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Acts as a fake FTPd server to translate FTP uploads from IP Cameras into motion events for MQTT",
   "main": "server.js",
   "bin": {
