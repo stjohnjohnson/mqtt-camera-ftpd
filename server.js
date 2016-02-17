@@ -134,17 +134,15 @@ function handleClient (connection) {
             rmdir: noop(),
             rename: noop(),
             stat: function () {
-                return function () {
-                    var callback = arguments[arguments.length - 1];
-                    callback(null, {
-                        mode: '0777',
-                        isDirectory: function () {
-                            return true;
-                        },
-                        size: 1,
-                        mtime: 1
-                    });
-                };
+                var callback = arguments[arguments.length - 1];
+                callback(null, {
+                    mode: '0777',
+                    isDirectory: function () {
+                        return true;
+                    },
+                    size: 1,
+                    mtime: 1
+                });
             }
         });
     });
@@ -162,7 +160,7 @@ function handleClient (connection) {
 // Main flow
 async.series([
     function loadFromDisk (next) {
-        winston.info('Starting MQTT Camera FTPd - %s', CURRENT_VERSION);
+        winston.info('Starting MQTT Camera FTPd - v%s', CURRENT_VERSION);
         winston.info('Loading configuration');
         config = loadConfiguration();
 
