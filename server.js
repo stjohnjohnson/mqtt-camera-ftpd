@@ -1,19 +1,18 @@
 /*jslint node: true */
 'use strict';
 
-var ftpd = require('ftpd'),
-    winston = require('winston'),
+var winston = require('winston'),
     path = require('path'),
     fs = require('fs'),
     yaml = require('js-yaml'),
     async = require('async'),
     mqtt = require('mqtt'),
-    fs = require('fs');
+    fs = require('fs'),
+    FtpServer = require('ftpd').FtpServer;
 
 var CONFIG_DIR = process.env.CONFIG_DIR || process.cwd(),
     CONFIG_FILE = path.join(CONFIG_DIR, 'config.yml'),
     SAMPLE_FILE = path.join(__dirname, '_config.yml'),
-    EVENTS_LOG = path.join(CONFIG_DIR, 'events.log'),
     CURRENT_VERSION = require('./package').version;
 
 var config,
@@ -21,12 +20,8 @@ var config,
     broker,
     timeouts = {};
 
-// Write all events to disk as well
-winston.add(winston.transports.File, {
-    filename: EVENTS_LOG,
-    level: 'debug',
-    json: false
-});
+// Show Debug logs in console
+winston.level = 'debug';
 
 /**
  * Load user configuration (or create it)
@@ -45,26 +40,42 @@ function loadConfiguration () {
  * Get the topic name for a given item
  * @method getTopicFor
  * @param  {String}    device   Device Name
+ * @param  {String}    type     Output type
  * @return {String}             MQTT Topic name
  */
-function getTopicFor (device) {
-    return [config.mqtt.preface, device, 'motion'].join('/');
+function getTopicFor (device, type) {
+    return [config.mqtt.preface, device, type].join('/');
 }
 
 /**
- * Notify the broker that something is triggers
+ * Notify the broker that something triggered
  * @method notifyMQTT
  * @param  {String}     id       Identifier for the camera
  * @param  {String}     value    Value to set (ON, OFF)
  */
 function notifyMQTT (id, value) {
-    var topic = getTopicFor(id);
+    var motionTopic = getTopicFor(id, 'motion'),
+        imageTopic = getTopicFor(id, 'image'),
+        events = [],
+        state = value ? 'active': 'inactive';
 
-    winston.debug('Notifying MQTT %s with %s', topic, value);
+    // Motion alert
+    winston.debug('Notifying MQTT %s with %s', motionTopic, state);
+    events.push(function (next) {
+        broker.publish(motionTopic, state, {
+            retain: true
+        }, next);
+    });
 
-    broker.publish(topic, value, {
-        retain: true
-    }, function (err) {
+    // Image alert
+    winston.debug('Notifying MQTT %s with %s', imageTopic, value ? 'image' : 'empty image');
+    events.push(function (next) {
+        broker.publish(imageTopic, value, {
+            retain: true
+        }, next);
+    });
+
+    async.parallel(events, function (err) {
         if (err) {
             winston.error('Error notifying MQTT', err);
         }
@@ -72,20 +83,23 @@ function notifyMQTT (id, value) {
 }
 
 /**
- * Notify MQTT
+ * Handle an events from the Camera
  * @method cameraEvent
- * @param  {String}     id Camera ID
+ * @param  {String}   id       Camera ID
+ * @param  {String}   file     Filename
+ * @param  {Stream}   contents Contents of uploaded file
+ * @param  {Function} callback Function to call when done
  */
 function cameraEvent (id, file, contents, callback) {
-    // 10 second cooldown
-    if (timeouts[id]) {
-        clearTimeout(timeouts[id]);
-    }
-    timeouts[id] = setTimeout(notifyMQTT.bind(null, id, 'inactive'), 10000);
-
     winston.info('Motion detected on %s', id);
 
-    notifyMQTT(id, 'active');
+    // Auto-clear motion alert after 10 seconds
+    clearTimeout(timeouts[id]);
+    timeouts[id] = setTimeout(notifyMQTT.bind(null, id, ''), 10000);
+
+    // Notify MQTT
+    notifyMQTT(id, contents);
+
     callback();
 }
 
@@ -177,7 +191,7 @@ async.series([
     },
     function setupServer (next) {
         winston.info('Configuring FTPd');
-        server = new ftpd.FtpServer('127.0.0.1', {
+        server = new FtpServer('127.0.0.1', {
             getInitialCwd: function () {
                 return '/';
             },
