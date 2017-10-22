@@ -5,6 +5,10 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/stjohnjohnson/mqtt-camera-ftpd.svg)](https://hub.docker.com/r/stjohnjohnson/mqtt-camera-ftpd/)
 [![Docker Stars](https://img.shields.io/docker/stars/stjohnjohnson/mqtt-camera-ftpd.svg)](https://hub.docker.com/r/stjohnjohnson/mqtt-camera-ftpd/)
 
+# DEPRECATED
+
+I'm not bridging IP Cameras and MQTT anymore, so the project is dead.  [@svrooij](https://github.com/svrooij) wrote a cool CLI that significant improves on this project over [here](https://github.com/svrooij/ipcam2mqtt/).
+
 # MQTT Events
 
 Events about a device are sent to MQTT using the following format:
