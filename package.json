@@ -30,7 +30,7 @@
   "dependencies": {
     "async": "^1.5.2",
     "ftpd": "^0.2.12",
-    "js-yaml": "^3.4.3",
+    "js-yaml": "^4.1.1",
     "mqtt": "^1.7.0",
     "winston": "^2.0.0"
   },
